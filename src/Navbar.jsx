@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { CircleUserRound, ShoppingCart, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { useCarrinho } from "./CarrinhoContext";
 import logo from "./assets/logo.jpg";
@@ -9,6 +9,27 @@ import "./Navbar.css";
 export default function Navbar() {
   const { usuario, isLogado } = useAuth();
   const { carrinho } = useCarrinho();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Pega o termo de busca atual da URL (se existir)
+  const termoURL = searchParams.get("busca") || "";
+  const [termoBusca, setTermoBusca] = useState(termoURL);
+
+  // Mantenha o input sincronizado com a URL
+  useEffect(() => {
+    setTermoBusca(termoURL);
+  }, [termoURL]);
+
+  // Função para redirecionar e filtrar na hora
+  const handleBuscaChange = (valor) => {
+    setTermoBusca(valor);
+    if (valor.trim()) {
+      navigate(`/?busca=${encodeURIComponent(valor)}`);
+    } else {
+      navigate("/");
+    }
+  };
 
   const totalItens = carrinho.reduce(
     (total, item) => total + Number(item.quantidade || 0),
@@ -31,11 +52,8 @@ export default function Navbar() {
         <input
           type="text"
           placeholder="Buscar produto..."
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              window.location.href = `/?busca=${encodeURIComponent(e.currentTarget.value)}`;
-            }
-          }}
+          value={termoBusca}
+          onChange={(e) => handleBuscaChange(e.target.value)}
         />
         <Search size={19} />
       </div>

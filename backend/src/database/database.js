@@ -73,3 +73,43 @@ db.exec(`
 `);
 
 module.exports = db;
+
+const countProdutos = db.prepare('SELECT COUNT(*) as total FROM produtos').get();
+
+if (countProdutos.total === 0) {
+  console.log(' Populando banco de dados com produtos iniciais...');
+  
+  const insertProduto = db.prepare(`
+    INSERT INTO produtos (nome, descricao, preco, preco_antigo, categoria, tamanhos, cor, imagem, estoque, ativo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+  `);
+
+  const produtosIniciais = [
+    [
+      "Conjunto Infantil Bebê Algodão",
+      "Conjunto super confortável 100% algodão para o dia a dia.",
+      89.90,
+      119.90,
+      "Conjuntos",
+      JSON.stringify(["2", "4", "6", "8", "10", "12", "14"]),
+      "Rosa",
+      "https://via.placeholder.com/300",
+      15
+    ],
+    [
+      "Vestido Infantil Floral Nana",
+      "Vestido leve e estampado perfeito para passeios e festas.",
+      109.90,
+      139.90,
+      "Vestidos",
+      JSON.stringify(["4", "6", "8", "10", "12"]),
+      "Florido",
+      "https://via.placeholder.com/300",
+      10
+    ]
+  ];
+
+  for (const prod of produtosIniciais) {
+    insertProduto.run(...prod);
+  }
+}

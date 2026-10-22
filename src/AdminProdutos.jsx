@@ -29,6 +29,10 @@ export default function AdminProdutos() {
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
+  // Estado para controlar se está a criar uma coleção nova na hora
+  const [criarNovaColecao, setCriarNovaColecao] = useState(false);
+  const [novaColecaoNome, setNovaColecaoNome] = useState("");
+
   useEffect(() => {
     if (!carregando && !isAdministrador) navigate("/login", { replace: true });
   }, [carregando, isAdministrador, navigate]);
@@ -47,27 +51,47 @@ export default function AdminProdutos() {
 
   useEffect(() => { if (isAdministrador) carregar(); }, [isAdministrador]);
 
+  // Lista de coleções existentes no banco de dados para o dropdown
+  const colecoesExistentes = Array.from(
+    new Set(produtos.map((p) => p.categoria).filter(Boolean))
+  );
+
   const alterar = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const lidarComMudancaCategoria = (e) => {
+    const valor = e.target.value;
+    if (valor === "NOVA_COLECAO") {
+      setCriarNovaColecao(true);
+      setForm((f) => ({ ...f, categoria: "" }));
+    } else {
+      setCriarNovaColecao(false);
+      setForm((f) => ({ ...f, categoria: valor }));
+    }
+  };
 
   const limpar = () => {
     setForm(vazio);
     setImagem(null);
     setEditando(null);
+    setCriarNovaColecao(false);
+    setNovaColecaoNome("");
     setErro("");
   };
 
   const editar = (produto) => {
     setEditando(produto.id);
+    const cat = produto.categoria || "";
     setForm({
       nome: produto.nome || "",
       descricao: produto.descricao || "",
       preco: produto.preco ?? "",
       preco_antigo: produto.preco_antigo ?? "",
-      categoria: produto.categoria || "",
+      categoria: cat,
       tamanhos: produto.tamanhos || "8,10,12,14",
       cor: produto.cor || "",
       estoque: produto.estoque ?? 0,
     });
+    setCriarNovaColecao(false);
     setImagem(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -79,8 +103,13 @@ export default function AdminProdutos() {
       setErro("Nome e preço são obrigatórios."); return;
     }
 
+    // Se estiver a criar uma coleção nova, usa o valor digitado
+    const categoriaFinal = criarNovaColecao ? novaColecaoNome.trim() : form.categoria;
+
     const dados = new FormData();
-    Object.entries(form).forEach(([chave, valor]) => dados.append(chave, valor));
+    Object.entries({ ...form, categoria: categoriaFinal }).forEach(([chave, valor]) =>
+      dados.append(chave, valor)
+    );
     if (imagem) dados.append("imagem", imagem);
 
     try {
@@ -137,7 +166,35 @@ export default function AdminProdutos() {
             <label>Preço *<input name="preco" type="number" step="0.01" min="0" value={form.preco} onChange={alterar} /></label>
             <label>Preço antigo<input name="preco_antigo" type="number" step="0.01" min="0" value={form.preco_antigo} onChange={alterar} /></label>
             <label>Estoque<input name="estoque" type="number" min="0" value={form.estoque} onChange={alterar} /></label>
-            <label>Categoria<input name="categoria" value={form.categoria} onChange={alterar} /></label>
+            
+            {/* Campo de Seleção/Criação de Coleção */}
+            <label>
+              Coleção / Categoria
+              <select
+                value={criarNovaColecao ? "NOVA_COLECAO" : form.categoria}
+                onChange={lidarComMudancaCategoria}
+              >
+                <option value="">Sem coleção (apenas catálogo geral)</option>
+                {colecoesExistentes.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+                <option value="NOVA_COLECAO"> Criar nova coleção...</option>
+              </select>
+            </label>
+
+            {criarNovaColecao && (
+              <label>
+                Nome da Nova Coleção *
+                <input
+                  type="text"
+                  placeholder="Ex: Coleção Verão, Pijamas..."
+                  value={novaColecaoNome}
+                  onChange={(e) => setNovaColecaoNome(e.target.value)}
+                  required
+                />
+              </label>
+            )}
+
             <label>Cor<input name="cor" value={form.cor} onChange={alterar} /></label>
             <label>Tamanhos<input name="tamanhos" value={form.tamanhos} onChange={alterar} placeholder="8,10,12,14" /></label>
             <label>Imagem<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(e) => setImagem(e.target.files?.[0] || null)} /></label>
@@ -163,7 +220,7 @@ export default function AdminProdutos() {
                   <div className="admin-produto-info">
                     <strong>{p.nome}</strong>
                     <span>{formatarPreco(p.preco)} · estoque: {p.estoque ?? 0}</span>
-                    <small>{p.categoria || "Sem categoria"}</small>
+                    <small>{p.categoria || "Sem coleção"}</small>
                   </div>
                   <div className="admin-produto-acoes">
                     <button type="button" onClick={() => editar(p)} title="Editar"><Pencil size={18} /> Editar</button>

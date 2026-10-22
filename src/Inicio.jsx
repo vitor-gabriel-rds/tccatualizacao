@@ -56,11 +56,40 @@ export default function Inicio() {
     };
   }, []);
 
+  // Busca por termo de pesquisa no Navbar
   const produtosFiltrados = produtos.filter((produto) =>
     String(produto.nome || "")
       .toLowerCase()
       .includes(termoBusca.toLowerCase())
   );
+
+  // Agrupa os produtos dinamicamente por coleção/categoria
+  const colecoesMap = produtos.reduce((acc, produto) => {
+    if (produto.categoria && String(produto.categoria).trim() !== "") {
+      const nomeColecao = String(produto.categoria).trim();
+      if (!acc[nomeColecao]) acc[nomeColecao] = [];
+      acc[nomeColecao].push(produto);
+    }
+    return acc;
+  }, {});
+
+  // Função para formatar o nome da coleção para exibição no título
+  const formatarNomeColecao = (nome) => {
+    if (!nome) return "";
+    const minusculo = nome.toLowerCase();
+
+    if (minusculo === "nana-mimi" || minusculo === "nana & mimi") {
+      return "Coleção Nana & Mimi";
+    }
+    if (minusculo === "conforto-estilo" || minusculo === "conforto & estilo") {
+      return "Conforto & Estilo";
+    }
+
+    // Troca traços por espaços e deixa as palavras com a primeira letra maiúscula
+    return nome
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (letra) => letra.toUpperCase());
+  };
 
   const renderCard = (item) => (
     <div key={item.id} className="card-wrapper">
@@ -134,23 +163,27 @@ export default function Inicio() {
         </>
       ) : (
         <>
-          <h2 className="titulo-fileira">Coleção Nana & Mimi</h2>
+          {/* Fileiras Dinâmicas de Coleções */}
+          {Object.entries(colecoesMap).map(([nomeColecao, listaProdutos]) => (
+            <div key={nomeColecao}>
+              <h2 className="titulo-fileira">
+                {formatarNomeColecao(nomeColecao)}
+              </h2>
+              <div className="produtos">
+                {listaProdutos.map(renderCard)}
+              </div>
+            </div>
+          ))}
+
+          {/* Seção Geral: Todas as Roupas */}
+          <h2 className="titulo-fileira">Todas as nossas opções</h2>
           <div className="produtos">
             {produtos.length > 0 ? (
-              produtos.slice(0, 4).map(renderCard)
+              produtos.map(renderCard)
             ) : (
               <p className="nenhum-produto">Nenhum produto cadastrado no momento.</p>
             )}
           </div>
-
-          {produtos.length > 4 && (
-            <>
-              <h2 className="titulo-fileira">Conforto & Estilo</h2>
-              <div className="produtos">
-                {produtos.slice(4, 8).map(renderCard)}
-              </div>
-            </>
-          )}
         </>
       )}
     </div>
