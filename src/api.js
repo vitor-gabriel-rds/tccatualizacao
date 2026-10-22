@@ -10,7 +10,7 @@ import produto6 from './assets/produto6.jpeg';
 import produto7 from './assets/produto7.jpeg';
 import produto8 from './assets/produto8.jpeg';
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || 'https://nanaemimi.onrender.com').replace(/\/+$/, '');
 
 const imagensLocais = {
   'produto1.png': produto1,
@@ -89,7 +89,11 @@ export function normalizarImagem(url) {
     return imagensLocais[nomeArquivo];
   }
 
-  if (texto.startsWith('http://back-ahgw.onrender.com')) {
+  if (texto.startsWith('/')) {
+    return `${API_URL}${texto}`;
+  }
+
+  if (texto.startsWith('http://')) {
     return texto.replace(/^http:\/\//, 'https://');
   }
 
