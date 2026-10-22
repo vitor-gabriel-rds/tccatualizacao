@@ -32,7 +32,7 @@
 .admin-produto-info span { font-size: 14px; }
 .admin-produto-info small { color: #777; }
 .admin-produto-acoes { display: flex; gap: 8px; }
-.admin-produto-acoes button { display: inline-flex; align-items: center; gap: 5px; padding: 9px 11px; border: 1px solid #ddd; border-radius: 7px; background: #fff; cursor: pointer; font-weight: 700; }
+.admin-produto-acoes button { display: inline-flex; align-items: center; gap: 5px; padding: 9px 11px; border: 1px solid #787878; border-radius: 7px; background: #ffffff; cursor: pointer; font-weight: 700; color: #333;}
 .admin-produto-acoes button:hover { border-color: #df3e80; }
 .admin-produto-acoes .perigo { color: #c62828; }
 @media (max-width: 700px) { .admin-form { grid-template-columns: 1fr; } .admin-campo-grande, .admin-arquivo, .admin-erro, .admin-sucesso, .admin-salvar { grid-column: auto; } .admin-produto { align-items: flex-start; flex-wrap: wrap; } .admin-produto-acoes { width: 100%; } .admin-produto-acoes button { flex: 1; justify-content: center; } }
