@@ -137,9 +137,9 @@ export default function Inicio() {
       </div>
 
       <div className="info-barra">
-        <div>💳 Parcele em até 12x</div>
-        <div>🚛 Frete grátis acima de R$199</div>
-        <div>🛡️ Site seguro</div>
+        <div>🎁 Embalado com carinho</div>
+        <div>👶 Conforto</div>
+        <div>🛡️ Durabilidade</div>
         <div>🎯 Produto de qualidade</div>
       </div>
 
